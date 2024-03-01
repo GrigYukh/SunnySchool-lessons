@@ -1,0 +1,36 @@
+
+
+# Создание Autoscaling Group
+aws autoscaling create-auto-scaling-group --auto-scaling-group-name Grig-asg --min-size 1 --max-size 3 --desired-capacity 1 --launch-template LaunchTemplateName=gryukhanyanLT
+
+# Создание LoadBalancer 
+aws elbv2 create-load-balancer --name GrigLB --type application --subnets subnet-03d6c24170a8b8dc1 subnet-0e7d2aee4619a71ec
+
+#Создание TargetGroup 
+aws elbv2 create-target-group --name GrigTG --protocol HTTP --port 80 --vpc-id vpc-0799504f6df9624a0
+
+
+# Привязка AutoScallingGroup к LoadBalancer
+aws autoscaling attach-load-balancer-target-groups --auto-scaling-group-name Grig-asg --target-group-arns arn:aws:elasticloadbalancing:us-east-1:730335231758:targetgroup/GrigTG/08012e4699ec4c9d
+
+# Создание RDS MySQL с частным доступом
+aws rds create-db-instance --db-instance-identifier grig-rds --db-instance-class db.t2.micro --engine MySQL --master-username root --master-user-password passwordik --allocated-storage 20 --vpc-security-group-ids sg-05fedb6ae58a19dd1 --db-subnet-group-name Default-vpc-0799504f6df9624a0 --no-publicly-accessible
+
+# Создание S3 Bucket с включенной версионностью
+aws s3api create-bucket --bucket grigyukh-bucket
+aws s3api put-bucket-versioning --bucket grigyukh-bucket --versioning-configuration Status=Enabled
+
+# Загрузка файла в бакет
+echo >> test.txt "Hello World"
+aws s3 cp test.txt s3://grigyukh-bucket/
+echo >> test.txt "Hello World new file "
+aws s3 cp test.txt s3://grigyukh-bucket/
+aws s3api get-bucket-versioning --bucket grigyukh-bucket
+
+
+#Удаление Template 
+aws ec2 delete-launch-template --launch-template-id lt-0dbf411e7a8671802 --region us-east-1
+#Удаление s3 Bucket
+aws s3 rb s3://grigyukh-bucket --force
+#Удаление RDS
+aws rds delete-db-instance --db-instance-identifier grig-rds --skip-final-snapshot
