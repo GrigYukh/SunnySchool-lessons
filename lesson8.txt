@@ -6,7 +6,7 @@ vpc_id=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --query 'Vpc.VpcId' --outpu
 
 # Создание публичной подсети
 echo "Creating public subnet..."
-public_subnet_id=$(aws ec2 create-subnet --vpc-id $vpc_id --cidr-block 10.0.1.0/24 --query 'Subnet.SubnetId' --output text)
+public_subnet_id=$(aws ec2 create-subnet --vpc-id $vpc_id --cidr-block 10.0.128.0/24 --query 'Subnet.SubnetId' --output text)
 
 # Создание Internet Gateway (IGW) и привязка его к VPC
 echo "Creating and attaching Internet Gateway (IGW)..."
@@ -21,7 +21,7 @@ aws ec2 associate-route-table --subnet-id $public_subnet_id --route-table-id $ro
 
 # Создание приватной подсети
 echo "Creating private subnet..."
-private_subnet_id=$(aws ec2 create-subnet --vpc-id $vpc_id --cidr-block 10.0.2.0/24 --query 'Subnet.SubnetId' --output text)
+private_subnet_id=$(aws ec2 create-subnet --vpc-id $vpc_id --cidr-block 10.0.129.0/24 --query 'Subnet.SubnetId' --output text)
 
 # Создание NAT Gateway (NAT GW) и привязка его к публичной подсети
 echo "Creating and attaching NAT Gateway (NAT GW) to public subnet..."
